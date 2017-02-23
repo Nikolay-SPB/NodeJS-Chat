@@ -1,0 +1,30 @@
+.msg-window {
+    max-width: 700px;
+    border: 1px solid #8bb0c1;
+    height: 390px;
+    margin-bottom: 10px;
+    padding: 1%;
+    border-radius: 8px;
+    font-family: Helvetica;
+    color: #1a507b;
+    font-size: 15px;
+    overflow-y: scroll;
+}
+input[name="msg-input"] {
+    padding: 8px;
+    font-size: 15px;
+    background-color: #fff;
+    width: 540px;
+    box-sizing: border-box;
+    border: 1px solid #a1c3b8;
+    border-top-color: #2a806c;
+    border-left-color: #2a806c;
+}
+.msg-window > div > span {
+    font-size: 0.9em;
+    color: #70b589;
+}
+.msg-window > div > time {
+    font-size: 0.9em;
+    color: #537539;
+}
