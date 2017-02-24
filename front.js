@@ -6,67 +6,151 @@
 
 $(function()
 {
-    //var socket = io.connect('http://localhost:8090');
+    var Settings = {
+        chatHost: 'http://localhost:8090',
+
+        maxMessageLength: 500
+    };
 
     var connected = false;
     var userdata;
+    var socket;
 
     var msgInput = $('input[name="msg-input"]');
     var msgWindow = $('div.msg-window .container');
+    var msgWindowParent = $('.msg-window');
     var conBtn = $('button[data-role="chat-connect"]');
     var nickCnt = $('input[name="nick"]');
+    var nickCntMain = $('div.nick');
+    var btnClearWnd = $('button.clear-window');
+    var usersCnt = $('div.users .users-container');
 
     var registeredMessage = false;
-
-    // socket.on('connect', function()
-    // {
-    //     if (registeredMessage) {
-    //         return;
-    //     }
-    //
-    //     socket.on('message', function (msg)
-    //     {
-    //         switch (msg.status) {
-    //             case 'connected':
-    //                 connected = true;
-    //                 userdata = msg.userdata;
-    //
-    //                 break;
-    //
-    //             case 'message':
-    //                 insertMessage(msg.nick, msg.message);
-    //                 break;
-    //
-    //             case 'new_user':
-    //                 notifyNewUser(msg.userdata);
-    //                 break;
-    //         }
-    //     });
-    //
-    //     registeredMessage = true;
-    // });
 
     msgInput.on('keyup', function(e)
     {
         if (e.key == "Enter") {
-            submitMessage($(this).val());
+            if (msgInput.val().length > 0) {
+                submitMessage($(this).val());
+            }
+        } else {
+            if (msgInput.val().length > Settings.maxMessageLength) {
+                msgInput.val( msgInput.val().slice(0, Settings.maxMessageLength) );
+            }
         }
     });
 
     conBtn.on('click', function()
     {
-        var nick = nickCnt.val().match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/);
+        var nick = nickCnt.val().match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u);
 
-        if (nick && nick.length >= 3) {
-
+        if (nick && nick[0].length >= 3) {
+            chatConnect(nick[0]);
         } else {
             alert('Допустимая длина ника от 3 до 32 символа. Может содержать только буквы, цифры, дефис и нижнее подчеркивание.')
         }
     });
 
+    btnClearWnd.click(function()
+    {
+        msgWindow.html('');
+    });
+
+    function chatConnect(nick)
+    {
+        socket = io.connect(Settings.chatHost);
+
+        socket.on('connect', function()
+        {
+            if (registeredMessage) {
+                return;
+            }
+
+            socket.on('message', function (msg)
+            {
+                switch (msg.status) {
+                    case 'connected':
+                        connected = true;
+                        userdata = msg.userdata;
+
+                        refreshUsersList(msg.users);
+
+                        // send our nick
+                        sendCommand('change_nick', nick);
+
+                        nickCntMain.animate({
+                            opacity: 0
+                        }, 500, function() {
+                            nickCntMain.hide();
+
+                            generalNotification('Добро пожаловать в чат.');
+
+                            msgInput.show();
+                        });
+
+                        break;
+
+                    case 'message':
+                        insertMessage(msg.nick, msg.message);
+                        break;
+
+                    case 'new_user':
+                        notifyNewUser(msg.userdata);
+                        refreshUsersList(msg.users);
+                        break;
+
+                    case 'user_changed_nick':
+                        generalNotification('User '+ msg.oldnick + ' changed nick to ' + msg.newnick);
+                        refreshUsersList(msg.users);
+                        break;
+
+                    case 'nick_change':
+                        userdata.nick = msg.newnick;
+                        refreshUsersList(msg.users);
+                        break;
+
+                    case 'user_left':
+                        generalNotification('User '+ msg.userdata.nick + ' left the chat');
+                        refreshUsersList(msg.users);
+                        break;
+                }
+            });
+
+            registeredMessage = true;
+        });
+    }
+
+    function refreshUsersList(users)
+    {
+        usersCnt.html('');
+
+        for (var i in users) {
+            var user = users[i];
+
+            usersCnt.append(
+                '<div>' +
+                    '<p class="user" data-uid="'+user.uid+'">'+user.nick+'</p>' +
+                '</div>'
+            );
+        }
+    }
+
+    function sendCommand(cmdName, cmdValue)
+    {
+        socket.send({
+            action: 'command',
+            command: {
+                name: cmdName,
+                value: cmdValue
+            },
+            userdata: userdata
+        });
+    }
+
     function submitMessage(msg)
     {
         socket.send({
+            action: 'new_message',
             userdata: userdata,
             message: msg
         });
@@ -99,6 +183,17 @@ $(function()
         msgWindowScrollToBottom();
     }
 
+    function generalNotification(msg)
+    {
+        msgWindow.append(
+            '<div>' +
+                '<time>['+getTime()+']</time> <i>* ' + msg +'</i>' +
+            '</div>'
+        );
+
+        msgWindowScrollToBottom();
+    }
+
     function getTime()
     {
         var dt = new Date();
@@ -108,6 +203,6 @@ $(function()
 
     function msgWindowScrollToBottom()
     {
-        msgWindow.scrollTop(msgWindow.prop('scrollHeight'));
+        msgWindowParent.scrollTop(msgWindowParent.prop('scrollHeight'));
     }
 });

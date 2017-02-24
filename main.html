@@ -14,7 +14,11 @@
 
 <body>
     <div class="msg-window">
-        <h1>ЖК "Гринландия" - Чат</h1>
+        <h1>
+            ЖК "Гринландия" - Чат
+
+            <button class="clear-window">Очистить историю</button>
+        </h1>
 
         <div class="nick">
             <h2>Добро пожаловать. Пожалуйста представьтесь.</h2>
@@ -25,10 +29,16 @@
 
         <div class="container"></div>
         <div class="msg-btm">
-            <input type="text" name="msg-input" placeholder="enter message">
+            <input type="text" name="msg-input" placeholder="Ваше сообщение">
         </div>
     </div>
 
-    <div class="users"></div>
+    <div class="users">
+        <div>
+            <p>Список пользователей:</p>
+        </div>
+
+        <div class="users-container"></div>
+    </div>
 </body>
 </html>
