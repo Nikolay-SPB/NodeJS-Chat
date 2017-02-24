@@ -1,113 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="http://localhost:8090/socket.io/socket.io.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <title>ЖК "Гринландия" - Чат</title>
+
+    <meta charset="utf-8" />
 
     <link rel="stylesheet" href="chat.css" />
+
+    <script src="http://localhost:8090/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="front.js"></script>
 </head>
 
 <body>
-    <div class="msg-window"></div>
+    <div class="msg-window">
+        <h1>ЖК "Гринландия" - Чат</h1>
 
-    <input type="text" name="msg-input" placeholder="enter message">
+        <div class="nick">
+            <h2>Добро пожаловать. Пожалуйста представьтесь.</h2>
+            <input type="text" name="nick" placeholder="Ваше имя или ник" />
 
-    <script>
-        var socket = io.connect('http://localhost:8090');
+            <button class="connect" data-role="chat-connect">Присоединиться</button>
+        </div>
 
-        var connected = false;
-        var userdata;
+        <div class="container"></div>
+        <div class="msg-btm">
+            <input type="text" name="msg-input" placeholder="enter message">
+        </div>
+    </div>
 
-        var msgInput = $('input[name="msg-input"]');
-        var msgWindow = $('div.msg-window');
-
-        var registeredMessage = false;
-
-        socket.on('connect', function()
-        {
-            if (registeredMessage) {
-                return;
-            }
-
-            socket.on('message', function (msg)
-            {
-                switch (msg.status) {
-                    case 'connected':
-                        connected = true;
-                        userdata = msg.userdata;
-
-                        console.log('Socket Connected');
-                        console.log('Userdata: ');
-                        console.log(userdata);
-
-                        break;
-
-                    case 'message':
-                        insertMessage(msg.nick, msg.message);
-                        break;
-
-                    case 'new_user':
-                        notifyNewUser(msg.userdata);
-                        break;
-                }
-            });
-
-            registeredMessage = true;
-        });
-
-        msgInput.on('keyup', function(e)
-        {
-            if (e.key == "Enter") {
-                submitMessage($(this).val());
-            }
-        });
-
-        function submitMessage(msg)
-        {
-            socket.send({
-                userdata: userdata,
-                message: msg
-            });
-
-            msgInput.val('');
-        }
-
-        function insertMessage(nick, message)
-        {
-            var p = document.createElement('p');
-            p.innerText = p.textContent = message;
-
-            msgWindow.append(
-                '<div>' +
-                    '<time>['+getTime()+']</time> <span>'+nick+':</span> ' + p.innerHTML +
-                '</div>'
-            );
-
-            msgWindowScrollToBottom();
-        }
-
-        function notifyNewUser(userdata)
-        {
-            msgWindow.append(
-                '<div>' +
-                    '<time>['+getTime()+']</time> <i>* User ' + userdata.nick + ' joined the chat</i>' +
-                '</div>'
-            );
-
-            msgWindowScrollToBottom();
-        }
-
-        function getTime()
-        {
-            var dt = new Date();
-
-            return dt.getHours() + ":" + (dt.getMinutes().toString().length == 1 ? ('0' + dt.getMinutes()) : dt.getMinutes());
-        }
-
-        function msgWindowScrollToBottom()
-        {
-            msgWindow.scrollTop(msgWindow.prop('scrollHeight'));
-        }
-    </script>
+    <div class="users"></div>
 </body>
 </html>
