@@ -6,42 +6,28 @@ var Settings = {
     maxMessageLength: 500
 };
 
+var spamFilter = {};
+
 var io = require('socket.io').listen(8090);
-var http = require('http');
 
 var users = [];
 var uIDCounter = 1;
-
-http.createServer(function(req, res)
-{
-    res.end('server 1');
-}).listen(8080);
+var date = new Date();
 
 io.sockets.on('connection', function (socket)
 {
-    var userdata = {
-        uid: uIDCounter++,
-        nick: 'Guest' + Math.random().toString().replace('.', '').slice(7)
-    };
-
-    users.push(userdata);
-
     socket.json.send({
-        status:'connected',
-        userdata: userdata,
-        users: user.getAllUsersPublicData()
+        status:'get_user_data'
     });
-
-    socket.broadcast.json.send({
-        status: 'new_user',
-        userdata: userdata,
-        users: user.getAllUsersPublicData()
-    });
-
-    debug.log('New user joined: ' + JSON.stringify(userdata));
 
     socket.on('message', function (msg)
     {
+        if (spamFilter.hasOwnProperty(socket.id) && spamFilter[socket.id].banned === true) {
+            return false;
+        }
+
+        monitorSpam(socket.id, socket);
+
         switch (msg.action) {
             case 'new_message':
                 var uid = msg.userdata.uid;
@@ -66,25 +52,57 @@ io.sockets.on('connection', function (socket)
 
     socket.on('disconnect', function()
     {
-        for (var i in users) {
-            var cuser = users[i];
+        if (socket.forcedDisconnect !== true) {
+            for (var i in users) {
+                var cuser = users[i];
 
-            if (cuser.uid == userdata.uid) {
-                users.splice(i,1);
-                uIDCounter--;
-                break;
+                if (cuser.uid == socket.userdata.uid) {
+                    users.splice(i, 1);
+                    uIDCounter--;
+                    break;
+                }
             }
+
+            io.sockets.json.send({
+                status: 'user_left',
+                userdata: socket.userdata,
+                users: user.getAllUsersPublicData()
+            });
         }
 
-        io.sockets.json.send({
-            status: 'user_left',
-            userdata: userdata,
-            users: user.getAllUsersPublicData()
-        });
-
-        debug.log('User left: ' + JSON.stringify(userdata));
+        debug.log('User left: ' + JSON.stringify(socket.userdata));
     });
 });
+
+function monitorSpam(socket_id, socket)
+{
+    if (!spamFilter.hasOwnProperty(socket_id)) {
+        spamFilter[socket_id] = {
+            messagesCount: 0
+        };
+    }
+
+    spamFilter[socket_id].messagesCount++;
+
+    if (spamFilter[socket_id].messagesCount >= 10) {
+        socket.json.send({
+            status: 'info_message',
+            message: 'spam_mute_5_min'
+        });
+
+        spamFilter[socket_id].messagesCount = 0;
+        spamFilter[socket_id].banned = true;
+
+        console.log(socket.handshake);
+    } else {
+        clearTimeout(spamFilter[socket_id].timerId);
+
+        spamFilter[socket_id].timerId = setTimeout(function(socketId)
+        {
+            spamFilter[socketId].messagesCount = 0;
+        }.bind(this, socket_id), 2000);
+    }
+}
 
 function broadcastMessage(socket, uid, nick, message)
 {
@@ -109,10 +127,64 @@ function parseCommand(command, msg, socket)
         case 'change_nick':
             user.changeUserNick(msg.userdata.uid, command.value, socket);
             break;
+
+        case 'start_user_data':
+            user.processNewUser(msg, socket);
+
+            break;
     }
 }
 
 var user = {
+    processNewUser: function(msg, socket)
+    {
+        var userdata, i;
+
+        if (!msg.userdata) {
+            userdata = {
+                uid: uIDCounter++,
+                nick: 'Guest' + Math.random().toString().replace('.', '').slice(7)
+            };
+
+            users.push(userdata);
+        } else {
+            userdata = msg.command.value;
+
+            // check for duplicate users
+            for (i in users) {
+                var cu = users[i];
+
+                if (cu.nick == userdata.nick) {
+                    debug.log('Duplicated user ' + cu.uid + ', dropping session');
+
+                    socket.userdata = userdata;
+                    socket.forcedDisconnect = true;
+                    socket.disconnect();
+
+                    return false;
+                }
+            }
+
+            users.push(userdata);
+        }
+
+        socket.userdata = userdata;
+
+        socket.broadcast.json.send({
+            status: 'new_user',
+            userdata: userdata,
+            users: user.getAllUsersPublicData()
+        });
+
+        debug.log('New user joined: ' + JSON.stringify(userdata));
+
+        socket.json.send({
+            status:'connected',
+            userdata: userdata,
+            users: user.getAllUsersPublicData()
+        });
+    },
+
     changeUserNick: function(user_id, new_nick, socket)
     {
         for (var i in users) {
@@ -137,8 +209,6 @@ var user = {
                 });
 
                 debug.log('User ' + user_id + ' changed nick from ' + oldnick + ' to ' + new_nick);
-                debug.log('Users:');
-                debug.log(user.getAllUsersPublicData());
 
                 break;
             }
@@ -168,3 +238,6 @@ var debug = {
         }
     }
 };
+
+debug.log('Server started ' + date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() +
+    ' ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds());

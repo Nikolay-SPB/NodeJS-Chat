@@ -40,11 +40,18 @@ $(function()
         }
     });
 
+    // if nick is already set then connect
+    if ($.cookie('nick') && $.cookie('nick').length > 0) {
+        chatConnect($.cookie('nick'));
+    }
+
     conBtn.on('click', function()
     {
         var nick = nickCnt.val().match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u);
 
         if (nick && nick[0].length >= 3) {
+            $.cookie('nick', nick, {path: '/'});
+
             chatConnect(nick[0]);
         } else {
             alert('Допустимая длина ника от 3 до 32 символа. Может содержать только буквы, цифры, дефис и нижнее подчеркивание.')
@@ -72,21 +79,24 @@ $(function()
                     case 'connected':
                         connected = true;
                         userdata = msg.userdata;
+                        saveUserData(userdata);
 
                         refreshUsersList(msg.users);
 
-                        // send our nick
-                        sendCommand('change_nick', nick);
+                        hideNickCntDisplayInputField();
 
-                        nickCntMain.animate({
-                            opacity: 0
-                        }, 500, function() {
-                            nickCntMain.hide();
+                        setCookie('connected', 1);
 
-                            generalNotification('Добро пожаловать в чат.');
+                        break;
 
-                            msgInput.show();
-                        });
+                    case 'get_user_data':
+                        if ($.cookie('user_data')) {
+                            userdata = JSON.parse($.cookie('user_data'));
+                        } else {
+                            userdata = null;
+                        }
+
+                        sendCommand('start_user_data', userdata);
 
                         break;
 
@@ -107,16 +117,43 @@ $(function()
                     case 'nick_change':
                         userdata.nick = msg.newnick;
                         refreshUsersList(msg.users);
+                        saveUserData(userdata);
                         break;
 
                     case 'user_left':
                         generalNotification('User '+ msg.userdata.nick + ' left the chat');
                         refreshUsersList(msg.users);
                         break;
+
+                    case 'info_message':
+                        var message = msg.message.replace('spam_mute_5_min', 'Вы заблокированы на 5 минут изза спама.');
+
+                        generalNotification(message);
+                        break;
                 }
             });
 
             registeredMessage = true;
+        });
+
+        socket.on('disconnect', function()
+        {
+            generalNotification('Потерянна связь с чатом');
+
+            socket.close();
+        });
+    }
+
+    function hideNickCntDisplayInputField()
+    {
+        nickCntMain.animate({
+            opacity: 0
+        }, 500, function() {
+            nickCntMain.hide();
+
+            generalNotification('Добро пожаловать в чат.');
+
+            msgInput.show();
         });
     }
 
@@ -204,5 +241,15 @@ $(function()
     function msgWindowScrollToBottom()
     {
         msgWindowParent.scrollTop(msgWindowParent.prop('scrollHeight'));
+    }
+
+    function setCookie(name, value)
+    {
+        $.cookie(name, value, {path: '/'});
+    }
+
+    function saveUserData()
+    {
+        setCookie('user_data', JSON.stringify(userdata));
     }
 });

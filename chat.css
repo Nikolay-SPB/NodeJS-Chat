@@ -27,7 +27,7 @@ button {
 button.clear-window {
     position: absolute;
     right: 0;
-    bottom: -64px;
+    bottom: 22px;
 }
 
 .msg-window {
