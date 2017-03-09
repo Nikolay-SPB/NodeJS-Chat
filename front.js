@@ -93,7 +93,10 @@ $(function()
                         if ($.cookie('user_data')) {
                             userdata = JSON.parse($.cookie('user_data'));
                         } else {
-                            userdata = null;
+                            userdata = {
+                                uid: 0,
+                                nick: nick
+                            };
                         }
 
                         sendCommand('start_user_data', userdata);
@@ -127,6 +130,7 @@ $(function()
 
                     case 'info_message':
                         var message = msg.message.replace('spam_mute_5_min', 'Вы заблокированы на 5 минут изза спама.');
+                        message = msg.message.replace('duplicate_nick', 'Пользователь с таким именем уже существует в чате. Пожалуйста выберите другое имя.');
 
                         generalNotification(message);
                         break;
@@ -140,7 +144,7 @@ $(function()
         {
             generalNotification('Потерянна связь с чатом');
 
-            socket.close();
+            //socket.close();
         });
     }
 

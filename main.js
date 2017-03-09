@@ -10,8 +10,7 @@ var spamFilter = {};
 
 var io = require('socket.io').listen(8090);
 
-var users = [];
-var uIDCounter = 1;
+var users = {};
 var date = new Date();
 
 io.sockets.on('connection', function (socket)
@@ -52,15 +51,11 @@ io.sockets.on('connection', function (socket)
 
     socket.on('disconnect', function()
     {
-        if (socket.forcedDisconnect !== true) {
-            for (var i in users) {
-                var cuser = users[i];
-
-                if (cuser.uid == socket.userdata.uid) {
-                    users.splice(i, 1);
-                    uIDCounter--;
-                    break;
-                }
+        if (socket.hasOwnProperty('isAlternate') && socket.isAlternate === true) {
+            debug.log('Alternate socket disconnected: ' + JSON.stringify(socket.userdata));
+        } else {
+            if (users.hasOwnProperty(socket.userdata.nick)) {
+                delete users[socket.userdata.nick];
             }
 
             io.sockets.json.send({
@@ -69,8 +64,6 @@ io.sockets.on('connection', function (socket)
                 users: user.getAllUsersPublicData()
             });
         }
-
-        debug.log('User left: ' + JSON.stringify(socket.userdata));
     });
 });
 
@@ -93,7 +86,13 @@ function monitorSpam(socket_id, socket)
         spamFilter[socket_id].messagesCount = 0;
         spamFilter[socket_id].banned = true;
 
-        console.log(socket.handshake);
+        spamFilter[socket_id].removeBanTimerId = setTimeout(function(socketId)
+        {
+            spamFilter[socketId].messagesCount = 0;
+            spamFilter[socketId].banned = false;
+
+            debug.log('Removed chat ban for socket: ' + socketId);
+        }.bind(this, socket_id), 300000);
     } else {
         clearTimeout(spamFilter[socket_id].timerId);
 
@@ -138,37 +137,36 @@ function parseCommand(command, msg, socket)
 var user = {
     processNewUser: function(msg, socket)
     {
-        var userdata, i;
+        var userdata;
 
-        if (!msg.userdata) {
-            userdata = {
-                uid: uIDCounter++,
-                nick: 'Guest' + Math.random().toString().replace('.', '').slice(7)
-            };
-
-            users.push(userdata);
+        if (!msg.userdata || !msg.userdata.nick) {
+            //TODO: when there is no nick
         } else {
             userdata = msg.command.value;
 
             // check for duplicate users
-            for (i in users) {
-                var cu = users[i];
+            if (users.hasOwnProperty(userdata.nick)) {
+                debug.log('Duplicated user connected ' + userdata.nick);
 
-                if (cu.nick == userdata.nick) {
-                    debug.log('Duplicated user ' + cu.uid + ', dropping session');
+                socket.isAlternate = true;
 
-                    socket.userdata = userdata;
-                    socket.forcedDisconnect = true;
-                    socket.disconnect();
-
-                    return false;
+                if (!users[userdata.nick].hasOwnProperty('alternateSockets')) {
+                    users[userdata.nick].alternateSockets = [];
                 }
+                users[userdata.nick].alternateSockets.push(socket);
+
+                socket.json.send({
+                    status: 'connected',
+                    userdata: userdata,
+                    users: user.getAllUsersPublicData()
+                });
+
+                return false;
             }
 
-            users.push(userdata);
+            users[userdata.nick] = {};
         }
 
-        socket.userdata = userdata;
 
         socket.broadcast.json.send({
             status: 'new_user',
@@ -221,8 +219,7 @@ var user = {
 
         for (var i in users) {
             endusers.push({
-                uid: users[i].uid,
-                nick: users[i].nick
+                nick: i
             });
         }
 
