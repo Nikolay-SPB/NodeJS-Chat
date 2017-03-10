@@ -6,8 +6,6 @@ var Settings = {
     maxMessageLength: 500
 };
 
-var spamFilter = {};
-
 var io = require('socket.io').listen(8090);
 
 var users = {};
@@ -21,17 +19,18 @@ io.sockets.on('connection', function (socket)
 
     socket.on('message', function (msg)
     {
-        if (spamFilter.hasOwnProperty(socket.id) && spamFilter[socket.id].banned === true) {
-            return false;
-        }
-
-        monitorSpam(socket.id, socket);
-
         switch (msg.action) {
             case 'new_message':
                 var uid = msg.userdata.uid;
                 var nick = msg.userdata.nick;
                 var message = msg.message;
+
+                
+                if (checkForBan(socket) === true) {
+                    return false;
+                }
+
+                monitorSpam(socket.id, socket);
 
                 // max length of message is 500 chars
                 if (message.length > Settings.maxMessageLength) {
@@ -45,65 +44,90 @@ io.sockets.on('connection', function (socket)
                 parseCommand(msg.command, msg, socket);
                 break;
         }
-
-
     });
 
     socket.on('disconnect', function()
     {
-        if (socket.hasOwnProperty('isAlternate') && socket.isAlternate === true) {
-            if (users[socket.nick].alternateSockets.hasOwnProperty(socket.id)) {
-                delete users[socket.nick].alternateSockets[socket.id];
-            }
-
-            debug.log('Alternate socket disconnected: ' + socket.nick);
-        } else {
-            if (users.hasOwnProperty(socket.nick)) {
-                delete users[socket.nick];
-            }
+        try {
+            delete users[socket.nick].sockets[socket.id];
 
             io.sockets.json.send({
                 status: 'user_left',
                 userdata: socket.userdata,
                 users: user.getAllUsersPublicData()
             });
+        } catch ($e) {
+            debug.log('[CRITICAL] ' + $e);
         }
     });
 });
 
 function monitorSpam(socket_id, socket)
 {
-    if (!spamFilter.hasOwnProperty(socket_id)) {
-        spamFilter[socket_id] = {
-            messagesCount: 0
-        };
+    var nick = socket.nick;
+    var user = users[nick];
+
+    if (!user.hasOwnProperty('spamMessagesCount')) {
+        user.spamMessagesCount = 0;
     }
 
-    spamFilter[socket_id].messagesCount++;
+    user.spamMessagesCount++;
 
-    if (spamFilter[socket_id].messagesCount >= 10) {
-        socket.json.send({
-            status: 'info_message',
-            message: 'spam_mute_5_min'
-        });
+    if (user.spamMessagesCount >= 10) {
+        sendInfoMessage('spam_mute_5_min', nick);
 
-        spamFilter[socket_id].messagesCount = 0;
-        spamFilter[socket_id].banned = true;
+        user.spamMessagesCount = 0;
+        user.spamBanned = true;
 
-        spamFilter[socket_id].removeBanTimerId = setTimeout(function(socketId)
+        user.removeBanTimerId = setTimeout(function(user)
         {
-            spamFilter[socketId].messagesCount = 0;
-            spamFilter[socketId].banned = false;
+            user.spamMessagesCount = 0;
+            user.spamBanned = false;
 
-            debug.log('Removed chat ban for socket: ' + socketId);
-        }.bind(this, socket_id), 300000);
+            debug.log('Removed chat ban for socket: ' + nick);
+        }.bind(this, user), 300000);
     } else {
-        clearTimeout(spamFilter[socket_id].timerId);
+        clearTimeout(user.timerId);
 
-        spamFilter[socket_id].timerId = setTimeout(function(socketId)
+        user.timerId = setTimeout(function(user)
         {
-            spamFilter[socketId].messagesCount = 0;
-        }.bind(this, socket_id), 2000);
+            user.spamMessagesCount = 0;
+        }.bind(this, user), 2000);
+    }
+}
+
+function sendInfoMessage(message, nick)
+{
+    var i;
+    var sMessage = {
+        status: 'info_message',
+        message: message
+    };
+
+    var sockets = users[nick].sockets;
+
+    for (i in sockets) {
+        sockets[i].json.send(sMessage);
+    }
+}
+
+/**
+ * Check for ban
+ * @param socket
+ * @returns {boolean} True if ban is actual
+ */
+function checkForBan(socket)
+{
+    try {
+        var user = users[socket.nick];
+
+        if (user.hasOwnProperty('spamBanned') && user.spamBanned === true) {
+            return true;
+        }
+
+        return false;
+    } catch ($e) {
+        debug.log('[CRITICAL] ' + $e);
     }
 }
 
@@ -148,45 +172,33 @@ var user = {
         } else {
             userdata = msg.command.value;
 
+            socket.nick = userdata.nick;
+
             // check for duplicate users
             if (users.hasOwnProperty(userdata.nick)) {
                 debug.log('Duplicated user connected ' + userdata.nick);
 
-                socket.isAlternate = true;
-                socket.nick = userdata.nick;
+                users[userdata.nick].sockets[socket.id] = socket;
+            } else {
+                users[userdata.nick] = {};
+                users[userdata.nick].sockets = {};
+                users[userdata.nick].sockets[socket.id] = socket;
 
-                if (!users[userdata.nick].hasOwnProperty('alternateSockets')) {
-                    users[userdata.nick].alternateSockets = {};
-                }
-                users[userdata.nick].alternateSockets[socket.id] = socket;
-
-                socket.json.send({
-                    status: 'connected',
+                socket.broadcast.json.send({
+                    status: 'new_user',
                     userdata: userdata,
                     users: user.getAllUsersPublicData()
                 });
 
-                return false;
+                debug.log('New user joined: ' + JSON.stringify(userdata));
             }
 
-            users[userdata.nick] = {};
-            socket.nick = userdata.nick;
+            socket.json.send({
+                status:'connected',
+                userdata: userdata,
+                users: user.getAllUsersPublicData()
+            });
         }
-
-
-        socket.broadcast.json.send({
-            status: 'new_user',
-            userdata: userdata,
-            users: user.getAllUsersPublicData()
-        });
-
-        debug.log('New user joined: ' + JSON.stringify(userdata));
-
-        socket.json.send({
-            status:'connected',
-            userdata: userdata,
-            users: user.getAllUsersPublicData()
-        });
     },
 
     changeUserNick: function(user_id, new_nick, socket)
@@ -237,10 +249,24 @@ var debug = {
     log: function(msg)
     {
         if (Debug === true) {
-            console.log(msg);
+            console.log(getCurrentTime() + '  ' + msg);
         }
     }
 };
 
-debug.log('Server started ' + date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() +
-    ' ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds());
+function getCurrentDateTime()
+{
+    return date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() +
+        ' ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+}
+
+function getCurrentTime()
+{
+    var h = date.getHours().length == 1 ? '0' + date.getHours() : date.getHours();
+    var m = date.getMinutes().length == 1 ? '0' + date.getMinutes() : date.getMinutes();
+    var s = date.getSeconds().length == 1 ? '0' + date.getSeconds() : date.getSeconds();
+
+    return h + ":" + m + ":" + s;
+}
+
+debug.log('Server started ' + getCurrentDateTime());

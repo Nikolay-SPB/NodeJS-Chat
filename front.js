@@ -129,8 +129,17 @@ $(function()
                         break;
 
                     case 'info_message':
-                        var message = msg.message.replace('spam_mute_5_min', 'Вы заблокированы на 5 минут изза спама.');
-                        message = msg.message.replace('duplicate_nick', 'Пользователь с таким именем уже существует в чате. Пожалуйста выберите другое имя.');
+                        var message;
+
+                        switch (msg.message) {
+                            case 'spam_mute_5_min':
+                                message = 'Вы заблокированы на 5 минут изза спама.';
+                                break;
+
+                            case 'duplicate_nick':
+                                message = 'Пользователь с таким именем уже существует в чате. Пожалуйста выберите другое имя.';
+                                break;
+                        }
 
                         generalNotification(message);
                         break;
