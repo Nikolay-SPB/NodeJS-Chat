@@ -52,10 +52,14 @@ io.sockets.on('connection', function (socket)
     socket.on('disconnect', function()
     {
         if (socket.hasOwnProperty('isAlternate') && socket.isAlternate === true) {
-            debug.log('Alternate socket disconnected: ' + JSON.stringify(socket.userdata));
+            if (users[socket.nick].alternateSockets.hasOwnProperty(socket.id)) {
+                delete users[socket.nick].alternateSockets[socket.id];
+            }
+
+            debug.log('Alternate socket disconnected: ' + socket.nick);
         } else {
-            if (users.hasOwnProperty(socket.userdata.nick)) {
-                delete users[socket.userdata.nick];
+            if (users.hasOwnProperty(socket.nick)) {
+                delete users[socket.nick];
             }
 
             io.sockets.json.send({
@@ -149,11 +153,12 @@ var user = {
                 debug.log('Duplicated user connected ' + userdata.nick);
 
                 socket.isAlternate = true;
+                socket.nick = userdata.nick;
 
                 if (!users[userdata.nick].hasOwnProperty('alternateSockets')) {
-                    users[userdata.nick].alternateSockets = [];
+                    users[userdata.nick].alternateSockets = {};
                 }
-                users[userdata.nick].alternateSockets.push(socket);
+                users[userdata.nick].alternateSockets[socket.id] = socket;
 
                 socket.json.send({
                     status: 'connected',
@@ -165,6 +170,7 @@ var user = {
             }
 
             users[userdata.nick] = {};
+            socket.nick = userdata.nick;
         }
 
 
