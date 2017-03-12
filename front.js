@@ -16,6 +16,8 @@ $(function()
     var userdata;
     var socket;
 
+    var sign = $.cookie('sign');
+
     var msgInput = $('input[name="msg-input"]');
     var msgWindow = $('div.msg-window .container');
     var msgWindowParent = $('.msg-window');
@@ -65,6 +67,19 @@ $(function()
 
     function chatConnect(nick)
     {
+        if (socket && socket.connected === true) {
+            // socket is already connected, try to connect with new nick
+            userdata = {
+                nick: nickCnt.val()
+            };
+
+            $.cookie('nick', nick, {path: '/'});
+
+            sendCommand('start_user_data', userdata);
+
+            return;
+        }
+
         socket = io.connect(Settings.chatHost);
 
         socket.on('connect', function()
@@ -87,15 +102,19 @@ $(function()
 
                         setCookie('connected', 1);
 
+                        setCookie('sign', msg.sign);
+                        sign = msg.sign;
+
                         break;
 
                     case 'get_user_data':
                         if ($.cookie('user_data')) {
                             userdata = JSON.parse($.cookie('user_data'));
+                            userdata.sign = sign;
                         } else {
                             userdata = {
-                                uid: 0,
-                                nick: nick
+                                nick: nick,
+                                sign: sign
                             };
                         }
 
@@ -124,7 +143,7 @@ $(function()
                         break;
 
                     case 'user_left':
-                        generalNotification('User '+ msg.userdata.nick + ' left the chat');
+                        generalNotification(msg.nick + ' покинул(а) чат.');
                         refreshUsersList(msg.users);
                         break;
 
@@ -138,6 +157,18 @@ $(function()
 
                             case 'duplicate_nick':
                                 message = 'Пользователь с таким именем уже существует в чате. Пожалуйста выберите другое имя.';
+                                break;
+
+                            case 'spam_unmute':
+                                message = 'Теперь можете снова писать.';
+                                break;
+
+                            case 'nick_already_exists':
+                                message = 'Такой ник уже существует. Пожалуйста выберите другой.';
+                                break;
+
+                            default:
+                                message = msg.message;
                                 break;
                         }
 
@@ -226,7 +257,7 @@ $(function()
     {
         msgWindow.append(
             '<div>' +
-            '<time>['+getTime()+']</time> <i>* User ' + userdata.nick + ' joined the chat</i>' +
+                '<time>['+getTime()+']</time> <i>* Пользователь ' + userdata.nick + ' присоединился к чату</i>' +
             '</div>'
         );
 
