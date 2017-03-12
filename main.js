@@ -199,7 +199,15 @@ var user = {
         } else {
             userdata = msg.command.value;
 
-            var userKey = userdata.nick.toLowerCase();
+            var userKey = userdata.nick.toLowerCase().trim();
+            userKey = userKey.match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u)[0];
+            userdata.nick = userdata.nick.match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u)[0];
+
+            if (!userKey) {
+                sendConnectionError('bad_nick', socket);
+
+                return false;
+            }
 
             var connectionSign = userdata.hasOwnProperty('sign') ? userdata.sign : false;
             var realSign = (users.hasOwnProperty(userKey) && users[userKey].hasOwnProperty('sign')) ? users[userKey].sign : false;
