@@ -4,6 +4,10 @@
  * Created on 23.02.2017.
  */
 
+if (typeof io == 'undefined') {
+    alert('Невозможно установить связь с сервером');
+}
+
 $(function()
 {
     var Settings = {
