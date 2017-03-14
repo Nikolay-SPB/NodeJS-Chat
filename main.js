@@ -24,7 +24,9 @@ io.sockets.on('connection', function (socket)
             case 'new_message':
                 var uid = msg.userdata.uid;
                 var nick = msg.userdata.nick;
+                var nickKey = msg.userdata.nick.toLowerCase();
                 var message = msg.message;
+                var sign = msg.sign;
 
                 
                 if (checkForBan(socket) === true) {
@@ -38,7 +40,15 @@ io.sockets.on('connection', function (socket)
                     message = message.slice(0, Settings.maxMessageLength);
                 }
 
-                broadcastMessage(socket, uid, nick, message);
+                // security check
+                if (sign !== users[nickKey].sign) {
+                    sendInfoMessage('BAD_SIGN', nick);
+
+                    debug.log('[WARNING] User sent message with bad sign! User nick - ' + nick);
+                } else {
+                    broadcastMessage(socket, uid, nick, message);
+                }
+
                 break;
 
             case 'command':
@@ -115,13 +125,15 @@ function monitorSpam(socket_id, socket)
 
 function sendInfoMessage(message, nick)
 {
+    var nickKey = nick.toLowerCase();
+
     var i;
     var sMessage = {
         status: 'info_message',
         message: message
     };
 
-    var sockets = users[nick].sockets;
+    var sockets = users[nickKey].sockets;
 
     for (i in sockets) {
         sockets[i].json.send(sMessage);
@@ -169,7 +181,7 @@ function broadcastMessage(socket, uid, nick, message)
     });
 
     socket.json.send({
-        status: 'message',
+        status: 'self_message',
         nick: nick,
         message: message
     });
@@ -200,8 +212,8 @@ var user = {
             userdata = msg.command.value;
 
             var userKey = userdata.nick.toLowerCase().trim();
-            userKey = userKey.match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u)[0];
-            userdata.nick = userdata.nick.match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u)[0];
+            userKey = userKey.match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/)[0];
+            userdata.nick = userdata.nick.match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/)[0];
 
             if (!userKey) {
                 sendConnectionError('bad_nick', socket);

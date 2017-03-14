@@ -130,6 +130,10 @@ $(function()
                         insertMessage(msg.nick, msg.message);
                         break;
 
+                    case 'self_message':
+                        insertMessage(msg.nick, msg.message, 'self');
+                        break;
+
                     case 'new_user':
                         notifyNewUser(msg.userdata);
                         refreshUsersList(msg.users);
@@ -237,20 +241,23 @@ $(function()
         socket.send({
             action: 'new_message',
             userdata: userdata,
-            message: msg
+            message: msg,
+            sign: $.cookie('sign')
         });
 
         msgInput.val('');
     }
 
-    function insertMessage(nick, message)
+    function insertMessage(nick, message, message_type)
     {
         var p = document.createElement('p');
         p.innerText = p.textContent = message;
 
+        var cls = message_type == 'self' ? 'self' : '';
+
         msgWindow.append(
-            '<div>' +
-            '<time>['+getTime()+']</time> <span>'+nick+':</span> ' + p.innerHTML +
+            '<div class="'+cls+'">' +
+                '<time>['+getTime()+']</time> <span>'+nick+':</span> ' + p.innerHTML +
             '</div>'
         );
 

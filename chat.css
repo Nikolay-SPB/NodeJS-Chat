@@ -71,6 +71,9 @@ input[type="text"] {
     font-size: 0.9em;
     color: #70b589;
 }
+.msg-window .container > div.self > span {
+    color: #00aaff;
+}
 .msg-window .container > div > time {
     font-size: 0.9em;
     color: #537539;
