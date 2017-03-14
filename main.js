@@ -1,3 +1,7 @@
+// TODO: security check when sending command
+// TODO: Mature filter?
+// TODO: smiles
+
 var Debug = true;
 
 var Settings = {
@@ -191,7 +195,7 @@ function parseCommand(command, msg, socket)
 {
     switch (command.name){
         case 'change_nick':
-            user.changeUserNick(msg.userdata.uid, command.value, socket);
+            user.changeUserNick(command.value, socket);
             break;
 
         case 'start_user_data':
@@ -264,34 +268,38 @@ var user = {
         }
     },
 
-    changeUserNick: function(user_id, new_nick, socket)
+    changeUserNick: function(new_nick, socket)
     {
-        for (var i in users) {
-            var curuser = users[i];
+        var i;
 
-            if (curuser.uid == user_id) {
-                var oldnick = curuser.nick;
-                users[i].nick = new_nick;
+        var oldNickKey = socket.nick.toLowerCase();
+        var oldNick = socket.nick;
+        var newNickKey = new_nick.toLowerCase().trim();
 
-                socket.json.send({
-                    status: 'nick_change',
-                    oldnick: oldnick,
-                    newnick: new_nick,
-                    users: user.getAllUsersPublicData()
-                });
+        users[newNickKey] = users[oldNickKey];
+        delete users[oldNickKey];
 
-                socket.broadcast.json.send({
-                    status: 'user_changed_nick',
-                    oldnick: oldnick,
-                    newnick: new_nick,
-                    users: user.getAllUsersPublicData()
-                });
-
-                debug.log('User ' + user_id + ' changed nick from ' + oldnick + ' to ' + new_nick);
-
-                break;
-            }
+        for (i in users[newNickKey].sockets) {
+            users[newNickKey].sockets[i].nick = new_nick;
         }
+
+        users[newNickKey].realNick = new_nick;
+
+        socket.json.send({
+            status: 'nick_change',
+            oldnick: socket.nick,
+            newnick: new_nick,
+            users: user.getAllUsersPublicData()
+        });
+
+        socket.broadcast.json.send({
+            status: 'user_changed_nick',
+            oldnick: socket.nick,
+            newnick: new_nick,
+            users: user.getAllUsersPublicData()
+        });
+
+        debug.log('User ' + oldNick + ' changed nick to ' + new_nick);
     },
 
     generateUserSecurityHash: function()

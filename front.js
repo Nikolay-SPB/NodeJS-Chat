@@ -28,7 +28,12 @@ $(function()
     var conBtn = $('button[data-role="chat-connect"]');
     var nickCnt = $('input[name="nick"]');
     var nickCntMain = $('div.nick');
+
     var btnClearWnd = $('button.clear-window');
+    var btnChangeNick = $('.js-change-nick');
+
+    var inputChangeNick = $('input[name="iChangeNick"]');
+
     var usersCnt = $('div.users .users-container');
 
     var registeredMessage = false;
@@ -53,21 +58,63 @@ $(function()
 
     conBtn.on('click', function()
     {
-        var nick = nickCnt.val().match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u);
+        doConnect();
+    });
 
-        if (nick && nick[0].length >= 3) {
-            $.cookie('nick', nick, {path: '/'});
-
-            chatConnect(nick[0]);
-        } else {
-            alert('Допустимая длина ника от 3 до 32 символа. Может содержать только буквы, цифры, дефис и нижнее подчеркивание.')
+    nickCnt.on('keypress', function(e)
+    {
+        if (e.charCode == 13) { //# enter pressed
+            doConnect();
         }
     });
+
+    function doConnect()
+    {
+        var nick = validateNick(nickCnt.val());
+
+        if (nick !== false) {
+            chatConnect(nick);
+        }
+    }
 
     btnClearWnd.click(function()
     {
         msgWindow.html('');
     });
+
+    btnChangeNick.click(function()
+    {
+        if (inputChangeNick.css('display') == 'none') {
+            inputChangeNick.css('display', 'inline-block');
+            inputChangeNick.width(150);
+            inputChangeNick.focus();
+        } else {
+            doChangeNick();
+        }
+    });
+
+    inputChangeNick.on('keypress', function(e)
+    {
+        if (e.charCode == 13) { //# enter pressed
+            doChangeNick();
+        }
+    });
+
+    function doChangeNick()
+    {
+        var nick = validateNick(inputChangeNick.val());
+
+        if (nick !== false) {
+            sendCommand('change_nick', nick);
+
+            inputChangeNick.width(0);
+            inputChangeNick.val('');
+
+            setTimeout(function() {
+                inputChangeNick.css('display', 'none');
+            }, 1000);
+        }
+    }
 
     function chatConnect(nick)
     {
@@ -140,7 +187,7 @@ $(function()
                         break;
 
                     case 'user_changed_nick':
-                        generalNotification('User '+ msg.oldnick + ' changed nick to ' + msg.newnick);
+                        generalNotification('Пользователь '+ msg.oldnick + ' поменял ник на ' + msg.newnick);
                         refreshUsersList(msg.users);
                         break;
 
@@ -148,6 +195,7 @@ $(function()
                         userdata.nick = msg.newnick;
                         refreshUsersList(msg.users);
                         saveUserData(userdata);
+                        generalNotification('Вы поменяли ник на ' + msg.newnick);
                         break;
 
                     case 'user_left':
@@ -206,6 +254,7 @@ $(function()
             generalNotification('Добро пожаловать в чат.');
 
             msgInput.show();
+            msgInput.focus();
         });
     }
 
@@ -306,5 +355,22 @@ $(function()
     function saveUserData()
     {
         setCookie('user_data', JSON.stringify(userdata));
+    }
+
+    function validateNick(nick)
+    {
+        var match = nick.match(/[a-zA-Z0-9а-яА-ЯёЁ_\-]{3,32}/u);
+
+        if (match && match[0].length >= 3) {
+            $.cookie('nick', match, {path: '/'});
+
+            return match[0];
+        } else {
+            alert('Допустимая длина ника от 3 до 32 символа. Может содержать только буквы, цифры, дефис и нижнее подчеркивание.');
+
+            return false;
+        }
+
+        return false;
     }
 });
