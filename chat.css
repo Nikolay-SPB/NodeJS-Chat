@@ -10,10 +10,10 @@ body {
     margin: 0;
 }
 
-button:hover {
+button:hover, .button:hover {
     background-color: #60824e;
 }
-button {
+button, .button {
     border: 1px solid #547d3d;
     padding: 8px 16px;
     font-size: 16px;
@@ -116,4 +116,49 @@ input[name="iChangeNick"] {
     display: none;
     width: 10px;
     transition: all 1s;
+}
+
+.smiley {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background-size: 32px;
+    vertical-align: middle;
+    background-repeat: no-repeat;
+}
+
+.sm1 {
+    background-image: url('i/smiles/smile_1.png');
+}
+
+.sm2 {
+    background-image: url('i/smiles/smile_2.png');
+}
+
+.sm3 {
+    background-image: url('i/smiles/smile_3.png');
+}
+
+.sm4 {
+    background-image: url('i/smiles/smile_4.png');
+}
+
+.sm5 {
+    background-image: url('i/smiles/smile_5.png');
+}
+
+.sm6 {
+    background-image: url('i/smiles/smile_6.png');
+}
+
+.sm7 {
+    background-image: url('i/smiles/smile_7.png');
+}
+
+.sm8 {
+    background-image: url('i/smiles/smile_8.png');
+}
+
+.sm9 {
+    background-image: url('i/smiles/smile_9.png');
 }

@@ -7,11 +7,14 @@ var Debug = true;
 var Settings = {
     chatHost: 'http://localhost:8090',
 
-    maxMessageLength: 500
+    maxMessageLength: 500,
+
+    logToFile: true
 };
 
 var io = require('socket.io').listen(8090);
 var crypto = require('crypto');
+var fs = require('fs');
 
 var users = {};
 var date = new Date();
@@ -325,10 +328,20 @@ var user = {
 };
 
 var debug = {
+    logStream: false,
+
     log: function(msg)
     {
         if (Debug === true) {
             console.log(getCurrentTime() + '  ' + msg);
+        }
+
+        if (Settings.logToFile === true) {
+            if (!this.logStream) {
+                this.logStream = fs.createWriteStream('./general.log', { flags: 'a' });
+            }
+
+            this.logStream.write(getCurrentTime() + '  ' + msg + "\n");
         }
     }
 };

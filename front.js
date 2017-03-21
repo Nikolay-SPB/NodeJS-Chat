@@ -5,7 +5,17 @@
  */
 
 if (typeof io == 'undefined') {
-    alert('Невозможно установить связь с сервером');
+    // alert('Невозможно установить связь с сервером');
+
+    $(function()
+    {
+        $('body').css('flex-direction', 'column');
+        $('body').css('margin', '2%');
+
+        document.body.innerHTML = "<h1>Невозможно установить связь с сервером.</h1>" +
+            '<p> <a onclick="document.location.reload(); return false;" class="button" href="#">Попробовать еще раз</a> </p>'
+        ;
+    });
 }
 
 $(function()
@@ -302,6 +312,8 @@ $(function()
         var p = document.createElement('p');
         p.innerText = p.textContent = message;
 
+        p.innerHTML = applySmiles(p.innerHTML);
+
         var cls = message_type == 'self' ? 'self' : '';
 
         msgWindow.append(
@@ -311,6 +323,21 @@ $(function()
         );
 
         msgWindowScrollToBottom();
+    }
+
+    function applySmiles(msg)
+    {
+        msg = msg.replace(':)',     '<span title=":)" class="smiley sm1"></span>');
+        msg = msg.replace(/:d/i,    '<span title=":D" class="smiley sm2"></span>');
+        msg = msg.replace(';)',     '<span title=";)" class="smiley sm3"></span>');
+        msg = msg.replace(':-)',    '<span title=":-)" class="smiley sm4"></span>');
+        msg = msg.replace(':-D',    '<span title=":-D" class="smiley sm5"></span>');
+        msg = msg.replace(/o_o/i,   '<span title="O_O" class="smiley sm6"></span>');
+        msg = msg.replace('^_^',    '<span title="^_^" class="smiley sm7"></span>');
+        msg = msg.replace(/:~d/i,   '<span title=":~D" class="smiley sm8"></span>');
+        msg = msg.replace(/:-x/i,   '<span title=":-X" class="smiley sm9"></span>');
+
+        return msg;
     }
 
     function notifyNewUser(userdata)
