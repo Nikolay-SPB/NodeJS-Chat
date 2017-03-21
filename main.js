@@ -1,6 +1,7 @@
 // TODO: security check when sending command
 // TODO: Mature filter?
 // TODO: mobile friendly layout
+// TODO: localization support
 
 var Debug = true;
 
