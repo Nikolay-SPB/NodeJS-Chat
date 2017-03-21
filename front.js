@@ -41,6 +41,7 @@ $(function()
 
     var btnClearWnd = $('button.clear-window');
     var btnChangeNick = $('.js-change-nick');
+    var btnSubmitMessage = $('button[name="submitMessage"]');
 
     var inputChangeNick = $('input[name="iChangeNick"]');
 
@@ -58,6 +59,15 @@ $(function()
             if (msgInput.val().length > Settings.maxMessageLength) {
                 msgInput.val( msgInput.val().slice(0, Settings.maxMessageLength) );
             }
+        }
+    });
+
+    btnSubmitMessage.on('click', function()
+    {
+        if (msgInput.val().length > 0) {
+            submitMessage(msgInput.val());
+
+            msgInput.focus();
         }
     });
 
@@ -263,7 +273,9 @@ $(function()
 
             generalNotification('Добро пожаловать в чат.');
 
-            msgInput.show();
+            msgInput.css('display', 'inline-block');
+            btnSubmitMessage.css('display', 'inline-block');
+
             msgInput.focus();
         });
     }
