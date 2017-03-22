@@ -38,9 +38,6 @@ button, .button {
 }
 input[name="msg-input"] {
     background-color: #fff;
-    height: 36px;
-    flex: 1 1 80%;
-    margin-right: 10px !important;
     display: none;
 }
 input[type="text"] {
@@ -53,6 +50,7 @@ input[type="text"] {
 
 .msg-window .container {
     flex-grow: 1;
+    padding-bottom: 20px;
 }
 .msg-window .container > div {
     padding: 2px 0;
@@ -165,4 +163,14 @@ button[name="submitMessage"] {
     width: 15%;
     display: none;
     flex: 1 1 15%;
+}
+
+.container > div > a > img {
+    max-width: 150px;
+    max-height: 150px;
+}
+
+.msg-input-cnt {
+    flex: 1 1 80%;
+    margin-right: 10px;
 }
