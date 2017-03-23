@@ -6,8 +6,6 @@
 var Debug = true;
 
 var Settings = {
-    chatHost: 'http://localhost:8090',
-
     maxMessageLength: 500,
 
     logToFile: true

@@ -21,7 +21,7 @@ if (typeof io == 'undefined') {
 $(function()
 {
     var Settings = {
-        chatHost: 'http://localhost:8090',
+        chatHost: 'http://'+document.location.hostname+':8090',
 
         maxMessageLength: 500
     };
