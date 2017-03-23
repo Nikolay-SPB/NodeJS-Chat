@@ -43,11 +43,19 @@ $(function()
     var btnChangeNick = $('.js-change-nick');
     var btnSubmitMessage = $('button[name="submitMessage"]');
 
+    var bottomCnt = $('.msg-btm');
+
     var inputChangeNick = $('input[name="iChangeNick"]');
 
     var usersCnt = $('div.users .users-container');
 
     var registeredMessage = false;
+
+    var allowedNotifications = false;
+
+    /* Init sequence */
+    //initNotifications();
+    initSmilesTipsContainer();
 
     msgInput.on('keyup', function(e)
     {
@@ -134,6 +142,16 @@ $(function()
                 inputChangeNick.css('display', 'none');
             }, 1000);
         }
+    }
+
+    function initNotifications()
+    {
+        Notification.requestPermission(function(permission)
+        {
+            if (permission == 'granted') {
+                allowedNotifications = true;
+            }
+        });
     }
 
     function chatConnect(nick)
@@ -273,8 +291,7 @@ $(function()
 
             generalNotification('Добро пожаловать в чат.');
 
-            msgInput.css('display', 'inline-block');
-            btnSubmitMessage.css('display', 'inline-block');
+            bottomCnt.css('display', 'flex');
 
             msgInput.focus();
         });
@@ -335,6 +352,13 @@ $(function()
             '</div>'
         );
 
+        /* send notification */
+        // if (document.visibilityState != 'visible') {
+        //     var notification = new Notification('Сколько ТЫЖ программистов нужно чтобы вкрутить лампочку?',
+        //         {body: 'Только ты!', dir: 'auto'}
+        //     );
+        // }
+
         msgWindowScrollToBottom();
     }
 
@@ -351,6 +375,21 @@ $(function()
         msg = msg.replace(/:-x/ig,   '<span title=":-X" class="smiley sm9"></span>');
 
         return msg;
+    }
+
+    function initSmilesTipsContainer()
+    {
+        var stci = $('.smiles-cnt > span');
+
+        stci.click(function()
+        {
+            var val = msgInput.val();
+            var selStart = msgInput.prop('selectionStart');
+            var start = val.substr(0, selStart);
+            var end = val.substr(selStart, val.length - selStart);
+
+            msgInput.val(start + $(this).attr('title') + end);
+        });
     }
 
     function parseContent(msg)

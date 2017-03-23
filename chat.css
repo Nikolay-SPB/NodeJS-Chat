@@ -38,7 +38,7 @@ button, .button {
 }
 input[name="msg-input"] {
     background-color: #fff;
-    display: none;
+    display: inline-block;
 }
 input[type="text"] {
     font-size: 16px;
@@ -54,6 +54,7 @@ input[type="text"] {
 }
 .msg-window .container > div {
     padding: 2px 0;
+    word-wrap: break-word;
 }
 .msg-window .container > div > span {
     font-size: 0.9em;
@@ -68,14 +69,17 @@ input[type="text"] {
 }
 .msg-btm {
     margin-top: 10px;
-    display: flex;
+    display: none;
     align-items: center;
+    flex-direction: column;
 }
 .msg-window > h1 {
     border-bottom: 1px solid #cad1dc;
-    padding-bottom: 30px;
+    padding-bottom: 4%;
     position: relative;
-    font-size: 30px;
+    font-size: calc(21px + 1vw);
+    margin: 1% 1% 5% 1%;
+    text-align: center;
 }
 
 .users {
@@ -86,6 +90,7 @@ input[type="text"] {
     min-width: 200px;
     padding: 0% 1%;
     overflow: hidden;
+    display: none;
 }
 .users .users-container > div:nth-child(even) {
     background-color: #e0e8e2;
@@ -106,6 +111,7 @@ input[type="text"] {
     right: 0;
     text-align: right;
     top: -6px;
+    display: none;
 }
 
 input[name="iChangeNick"] {
@@ -160,8 +166,8 @@ input[name="iChangeNick"] {
 }
 
 button[name="submitMessage"] {
-    width: 15%;
-    display: none;
+    width: 95%;
+    display: inline-block;
     flex: 1 1 15%;
 }
 
@@ -172,5 +178,62 @@ button[name="submitMessage"] {
 
 .msg-input-cnt {
     flex: 1 1 80%;
-    margin-right: 10px;
+    /*margin-right: 10px;*/
+    position: relative;
+    width: 95%;
+}
+
+.smiles-cnt-opener {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    top: 0px;
+    right: 1px;
+    background: url(i/smiles/smile_1.png) no-repeat;
+    background-size: 28px;
+    cursor: pointer;
+    filter: grayscale(14%);
+    background-position: 3px 4px;
+}
+.smiles-cnt-opener:hover + .smiles-cnt {
+    display: block;
+}
+
+.smiles-cnt {
+    position: absolute;
+    width: 150px;
+    text-align: center;
+    top: -117px;
+    right: 0px;
+    background-color: #e1eaea;
+    border: 1px solid #126b1c;
+    padding: 10px;
+    display: none;
+}
+.smiles-cnt:hover {
+    display: block;
+}
+.smiles-cnt > span {
+    cursor: pointer;
+}
+
+@media (min-width: 600px) {
+    .users {
+        display: block;
+    }
+
+    .msg-btm {
+        flex-direction: row;
+    }
+
+    .msg-window > h1 {
+        padding-bottom: 32px;
+        font-size: 30px;
+        margin: 10px 0 16px;
+        text-align: left;
+    }
+
+    .msg-input-cnt {
+        margin-right: 10px;
+    }
 }
