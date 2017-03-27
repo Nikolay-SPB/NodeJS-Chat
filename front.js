@@ -284,6 +284,10 @@ $(function()
                                 message = 'Такой ник уже существует. Пожалуйста выберите другой.';
                                 break;
 
+                            case 'NICKS_ARE_SAME':
+                                message = 'Новый и старый ник идентичны';
+                                break;
+
                             default:
                                 message = msg.message;
                                 break;

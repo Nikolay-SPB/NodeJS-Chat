@@ -309,6 +309,12 @@ var user = {
         var sign = users[oldNickKey].sign;
         var newNickKey = new_nick.toLowerCase().trim();
 
+        if (oldNickKey == newNickKey) {
+            sendInfoMessage('NICKS_ARE_SAME', oldNick);
+
+            return;
+        }
+
         users[newNickKey] = users[oldNickKey];
         delete users[oldNickKey];
 
