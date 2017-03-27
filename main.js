@@ -5,6 +5,7 @@
    TODO:
      3) сделать перенос строки как в скайпе, чтобы я мог постить несколько строк, а не только одну
      7) вставление изображения из буфера обмена
+     8) Nick change spamming protection
  */
 
 var Debug = true;
@@ -20,7 +21,6 @@ var crypto = require('crypto');
 var fs = require('fs');
 
 var users = {};
-var date = new Date();
 
 io.sockets.on('connection', function (socket)
 {
@@ -319,12 +319,14 @@ var user = {
         users[newNickKey].realNick = new_nick;
         users[newNickKey].sign = sign;
 
-        socket.json.send({
-            status: 'nick_change',
-            oldnick: socket.nick,
-            newnick: new_nick,
-            users: user.getAllUsersPublicData()
-        });
+        for (i in users[newNickKey].sockets) {
+            users[newNickKey].sockets[i].json.send({
+                status: 'nick_change',
+                oldnick: socket.nick,
+                newnick: new_nick,
+                users: user.getAllUsersPublicData()
+            });
+        }
 
         socket.broadcast.json.send({
             status: 'user_changed_nick',
@@ -379,12 +381,16 @@ var debug = {
 
 function getCurrentDateTime()
 {
+    var date = new Date();
+
     return date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() +
         ' ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
 }
 
 function getCurrentTime()
 {
+    var date = new Date();
+
     var h = date.getHours().length == 1 ? '0' + date.getHours() : date.getHours();
     var m = date.getMinutes().length == 1 ? '0' + date.getMinutes() : date.getMinutes();
     var s = date.getSeconds().length == 1 ? '0' + date.getSeconds() : date.getSeconds();
