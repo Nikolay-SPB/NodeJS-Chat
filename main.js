@@ -1,11 +1,9 @@
-// TODO: security check when sending command
 // TODO: Mature filter?
 // TODO: localization support
 // TODO: 1) надо чтобы если свернул, закладка в браузере горела, если новое сообщение пришло
 /*
    TODO:
      3) сделать перенос строки как в скайпе, чтобы я мог постить несколько строк, а не только одну
-     6) кнопки настроек "очистить историю" "сменить ник" и прочие, надо вести с диалогом, иначе вот мы настрочили пиздец
      7) вставление изображения из буфера обмена
  */
 
@@ -32,40 +30,44 @@ io.sockets.on('connection', function (socket)
 
     socket.on('message', function (msg)
     {
-        switch (msg.action) {
-            case 'new_message':
-                var uid = msg.userdata.uid;
-                var nick = msg.userdata.nick;
-                var nickKey = msg.userdata.nick.toLowerCase();
-                var message = msg.message;
-                var sign = msg.sign;
+        try {
+            switch (msg.action) {
+                case 'new_message':
+                    var uid = msg.userdata.uid;
+                    var nick = msg.userdata.nick;
+                    var nickKey = msg.userdata.nick.toLowerCase();
+                    var message = msg.message;
+                    var sign = msg.sign;
 
-                
-                if (checkForBan(socket) === true) {
-                    return false;
-                }
 
-                monitorSpam(socket.id, socket);
+                    if (checkForBan(socket) === true) {
+                        return false;
+                    }
 
-                // max length of message is 500 chars
-                if (message.length > Settings.maxMessageLength) {
-                    message = message.slice(0, Settings.maxMessageLength);
-                }
+                    monitorSpam(socket.id, socket);
 
-                // security check
-                if (sign !== users[nickKey].sign) {
-                    sendInfoMessage('BAD_SIGN', nick);
+                    // max length of message is 500 chars
+                    if (message.length > Settings.maxMessageLength) {
+                        message = message.slice(0, Settings.maxMessageLength);
+                    }
 
-                    debug.log('[WARNING] User sent message with bad sign! User nick - ' + nick);
-                } else {
-                    broadcastMessage(socket, uid, nick, message);
-                }
+                    // security check
+                    if (sign !== users[nickKey].sign) {
+                        sendInfoMessage('BAD_SIGN', nick);
 
-                break;
+                        debug.log('[WARNING] User sent message with bad sign! User nick - ' + nick);
+                    } else {
+                        broadcastMessage(socket, uid, nick, message);
+                    }
 
-            case 'command':
-                parseCommand(msg.command, msg, socket);
-                break;
+                    break;
+
+                case 'command':
+                    parseCommand(msg.command, msg, socket, msg.sign);
+                    break;
+            }
+        } catch ($e) {
+            debug.log('[CRITICAL 0x8003] ' + $e);
         }
     });
 
@@ -199,17 +201,39 @@ function broadcastMessage(socket, uid, nick, message)
     });
 }
 
-function parseCommand(command, msg, socket)
+function parseCommand(command, msg, socket, sign)
 {
-    switch (command.name){
-        case 'change_nick':
-            user.changeUserNick(command.value, socket);
-            break;
+    try {
+        var nick = msg.userdata.nick;
+        var lNick = nick.toLowerCase();
 
-        case 'start_user_data':
-            user.processNewUser(msg, socket);
+        if (!lNick || !sign) {
+            debug.log('[CRITICAL 0x8004b] ' + $e);
+        } else {
+            /* Check if command is signed */
+            if (command.name != 'start_user_data') {
+                if (sign !== users[lNick].sign) {
+                    debug.log('Bad command sign from user ('+nick+')');
 
-            break;
+                    sendInfoMessage('BAD_COMMAND_SIGN', nick);
+
+                    return false;
+                }
+            }
+
+            switch (command.name) {
+                case 'change_nick':
+                    user.changeUserNick(command.value, socket);
+                    break;
+
+                case 'start_user_data':
+                    user.processNewUser(msg, socket);
+
+                    break;
+            }
+        }
+    } catch ($e) {
+        debug.log('[CRITICAL 0x8004] ' + $e);
     }
 }
 

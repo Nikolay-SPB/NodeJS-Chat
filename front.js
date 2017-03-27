@@ -33,8 +33,7 @@ $(function()
     var sign = $.cookie('sign');
 
     var msgInput = $('input[name="msg-input"]');
-    var msgWindow = $('div.msg-window .container');
-    var msgWindowParent = $('.msg-window');
+    var msgWindow = $('.msg-window .container');
     var conBtn = $('button[data-role="chat-connect"]');
     var nickCnt = $('input[name="nick"]');
     var nickCntMain = $('div.nick');
@@ -56,6 +55,7 @@ $(function()
     /* Init sequence */
     //initNotifications();
     initSmilesTipsContainer();
+    initClipboardHandler();
 
     msgInput.on('keyup', function(e)
     {
@@ -152,6 +152,29 @@ $(function()
                 allowedNotifications = true;
             }
         });
+    }
+
+    function initClipboardHandler()
+    {
+        // Disabled @ moment
+        /*window.addEventListener('paste', function(e)
+        {
+            var items = e.clipboardData.items;
+
+            if (items) {
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+
+                    if (item.type.indexOf("image") !== -1) {
+                        var blob = item.getAsFile();
+                        var url = window.URL;
+                        var src = url.createObjectURL(blob);
+
+                        $('body').css('background-image', 'url('+src+')');
+                    }
+                }
+            }
+        });*/
     }
 
     function chatConnect(nick)
@@ -320,7 +343,8 @@ $(function()
                 name: cmdName,
                 value: cmdValue
             },
-            userdata: userdata
+            userdata: userdata,
+            sign: sign
         });
     }
 
@@ -434,7 +458,7 @@ $(function()
 
     function msgWindowScrollToBottom()
     {
-        msgWindowParent.scrollTop(msgWindowParent.prop('scrollHeight'));
+        msgWindow.scrollTop(msgWindow.prop('scrollHeight'));
     }
 
     function setCookie(name, value)
