@@ -365,17 +365,41 @@ var debug = {
 
     log: function(msg)
     {
+        var self = this;
+
         if (Debug === true) {
             console.log(getCurrentTime() + '  ' + msg);
         }
 
         if (Settings.logToFile === true) {
             if (!this.logStream) {
-                this.logStream = fs.createWriteStream('./general.log', { flags: 'a' });
+                fs.stat('./logs', function(err, stats)
+                {
+                    if (err.code === 'ENOENT') {
+                        fs.mkdir('./logs', 400, function(e)
+                        {
+                            self.initLogStream();
+                            self.writeToLog(msg);
+                        });
+                    } else {
+                        self.initLogStream();
+                        self.writeToLog(msg);
+                    }
+                });
+            } else {
+                self.writeToLog(msg);
             }
-
-            this.logStream.write(getCurrentTime() + '  ' + msg + "\n");
         }
+
+        this.initLogStream = function()
+        {
+            this.logStream = fs.createWriteStream('./logs/general.log', { flags: 'a' });
+        };
+
+        this.writeToLog = function(msg)
+        {
+            this.logStream.write(getCurrentTime() + '  ' + msg + "\n");
+        };
     }
 };
 
