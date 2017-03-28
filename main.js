@@ -375,7 +375,7 @@ var debug = {
             if (!this.logStream) {
                 fs.stat('./logs', function(err, stats)
                 {
-                    if (err.code === 'ENOENT') {
+                    if (err && err.code === 'ENOENT') {
                         fs.mkdir('./logs', 400, function(e)
                         {
                             self.initLogStream();
