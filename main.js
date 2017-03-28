@@ -1,16 +1,7 @@
-// TODO: Mature filter?
-// TODO: localization support
-// TODO: 1) надо чтобы если свернул, закладка в браузере горела, если новое сообщение пришло
-/*
-   TODO:
-     3) сделать перенос строки как в скайпе, чтобы я мог постить несколько строк, а не только одну
-     7) вставление изображения из буфера обмена
-     8) Nick change spamming protection
-     9) make separate folder for log
- */
-
+//TODO: remove from here
 var Debug = true;
 
+//TODO: remove to settings
 var Settings = {
     maxMessageLength: 500,
 

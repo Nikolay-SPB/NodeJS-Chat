@@ -1,0 +1,8 @@
+TODO: Mature filter?
+TODO: When someone send message to me, fire notification if window is not focused
+
+TODO:
+ 1) support for multiline messages
+ 2) pasting images from clipboard
+ 3) Nick change spamming protection
+ 4) make separate folder for log
