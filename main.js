@@ -6,6 +6,7 @@
      3) сделать перенос строки как в скайпе, чтобы я мог постить несколько строк, а не только одну
      7) вставление изображения из буфера обмена
      8) Nick change spamming protection
+     9) make separate folder for log
  */
 
 var Debug = true;
@@ -207,30 +208,32 @@ function parseCommand(command, msg, socket, sign)
         var nick = msg.userdata.nick;
         var lNick = nick.toLowerCase();
 
-        if (!lNick || !sign) {
-            debug.log('[CRITICAL 0x8004b] ' + $e);
-        } else {
-            /* Check if command is signed */
-            if (command.name != 'start_user_data') {
-                if (sign !== users[lNick].sign) {
-                    debug.log('Bad command sign from user ('+nick+')');
+        /* Check if command is signed */
+        if (command.name !== 'start_user_data') {
+            if (!lNick || !sign) {
+                debug.log('[CRITICAL 0x8004b] No nick or sign');
 
-                    sendInfoMessage('BAD_COMMAND_SIGN', nick);
-
-                    return false;
-                }
+                return false;
             }
 
-            switch (command.name) {
-                case 'change_nick':
-                    user.changeUserNick(command.value, socket);
-                    break;
+            if (sign !== users[lNick].sign) {
+                debug.log('Bad command sign from user ('+nick+')');
 
-                case 'start_user_data':
-                    user.processNewUser(msg, socket);
+                sendInfoMessage('BAD_COMMAND_SIGN', nick);
 
-                    break;
+                return false;
             }
+        }
+
+        switch (command.name) {
+            case 'change_nick':
+                user.changeUserNick(command.value, socket);
+                break;
+
+            case 'start_user_data':
+                user.processNewUser(msg, socket);
+
+                break;
         }
     } catch ($e) {
         debug.log('[CRITICAL 0x8004] ' + $e);

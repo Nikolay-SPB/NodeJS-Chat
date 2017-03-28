@@ -1,10 +1,12 @@
 <?php
-    $localHost = $settings['dev_mode'] === true ? 'http://localhost' : $settings['host'];
+    namespace NodeJS_Chat;
+
+    $localHost = Settings::get('dev_mode') === true ? 'http://localhost' : Settings::get('host');
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ЖК "Гринландия" - Чат</title>
+    <title><?=Localization::get('chatTitle1')?></title>
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,26 +22,26 @@
 <body>
 <div class="msg-window">
     <h1>
-        ЖК "Гринландия" - Чат
+        <?=Localization::get('chatTitle1')?>
 
         <div class="r-actions">
-            <input type="text" name="iChangeNick" placeholder="Новый ник">
-            <button class="change-nick js-change-nick">Изменить ник</button>
-            <button class="clear-window">Очистить историю</button>
+            <input type="text" name="iChangeNick" placeholder="<?=Localization::get('newNick')?>">
+            <button class="change-nick js-change-nick"><?=Localization::get('changeNick')?></button>
+            <button class="clear-window"><?=Localization::get('clearHistory')?></button>
         </div>
     </h1>
 
     <div class="nick">
-        <h2>Добро пожаловать. Пожалуйста представьтесь.</h2>
-        <input type="text" name="nick" placeholder="Ваше имя или ник" />
+        <h2><?=Localization::get('welcomePleaseIntroduceYourself')?></h2>
+        <input type="text" name="nick" placeholder="<?=Localization::get('yourNameOrNick')?>" />
 
-        <button class="connect" data-role="chat-connect">Присоединиться</button>
+        <button class="connect" data-role="chat-connect"><?=Localization::get('connect')?></button>
     </div>
 
     <div class="container"></div>
     <div class="msg-btm">
         <div class="msg-input-cnt">
-            <input type="text" name="msg-input" placeholder="Ваше сообщение">
+            <input type="text" name="msg-input" placeholder="<?=Localization::get('yourMessage')?>">
             <span class="smiles-cnt-opener"></span>
             <div class="smiles-cnt">
                 <span title=":)" class="smiley sm1"></span>
@@ -53,13 +55,13 @@
                 <span title=":-X" class="smiley sm9"></span>
             </div>
         </div>
-        <button name="submitMessage">Отправить</button>
+        <button name="submitMessage"><?=Localization::get('send')?></button>
     </div>
 </div>
 
 <div class="users">
     <div>
-        <p>Список пользователей:</p>
+        <p><?=Localization::get('usersList')?></p>
     </div>
 
     <div class="users-container"></div>

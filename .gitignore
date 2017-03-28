@@ -1,4 +1,4 @@
 .idea
 /node_modules
 general.log
-config.local.php
+settings.development.json
