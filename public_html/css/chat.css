@@ -130,39 +130,39 @@ input[name="iChangeNick"] {
 }
 
 .sm1 {
-    background-image: url('i/smiles/smile_1.png');
+    background-image: url('../i/smiles/smile_1.png');
 }
 
 .sm2 {
-    background-image: url('i/smiles/smile_2.png');
+    background-image: url('../i/smiles/smile_2.png');
 }
 
 .sm3 {
-    background-image: url('i/smiles/smile_3.png');
+    background-image: url('../i/smiles/smile_3.png');
 }
 
 .sm4 {
-    background-image: url('i/smiles/smile_4.png');
+    background-image: url('../i/smiles/smile_4.png');
 }
 
 .sm5 {
-    background-image: url('i/smiles/smile_5.png');
+    background-image: url('../i/smiles/smile_5.png');
 }
 
 .sm6 {
-    background-image: url('i/smiles/smile_6.png');
+    background-image: url('../i/smiles/smile_6.png');
 }
 
 .sm7 {
-    background-image: url('i/smiles/smile_7.png');
+    background-image: url('../i/smiles/smile_7.png');
 }
 
 .sm8 {
-    background-image: url('i/smiles/smile_8.png');
+    background-image: url('../i/smiles/smile_8.png');
 }
 
 .sm9 {
-    background-image: url('i/smiles/smile_9.png');
+    background-image: url('../i/smiles/smile_9.png');
 }
 
 button[name="submitMessage"] {
@@ -189,7 +189,7 @@ button[name="submitMessage"] {
     height: 35px;
     top: 0px;
     right: 1px;
-    background: url(i/smiles/smile_1.png) no-repeat;
+    background: url(../i/smiles/smile_1.png) no-repeat;
     background-size: 28px;
     cursor: pointer;
     filter: grayscale(14%);

@@ -14,8 +14,8 @@ class Settings
 
     public function init()
     {
-        $file = __DIR__ . "/settings.json";
-        $devFile = __DIR__ . "/settings.development.json";
+        $file = __DIR__ . "/../public_html/settings.json";
+        $devFile = __DIR__ . "/../public_html/settings.development.json";
 
         if (!file_exists($file)) {
             throw new \Exception('Settings file does not exists');

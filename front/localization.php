@@ -14,7 +14,7 @@ class Localization
 
     public function init()
     {
-        $file = __DIR__ . "/i18n.json";
+        $file = __DIR__ . "/../public_html/i18n.json";
 
         if (!file_exists($file)) {
             throw new \Exception('Localization file does not exists');
