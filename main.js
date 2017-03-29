@@ -330,7 +330,7 @@ var user = {
 
         socket.broadcast.json.send({
             status: 'user_changed_nick',
-            oldnick: socket.nick,
+            oldnick: oldNick,
             newnick: new_nick,
             users: user.getAllUsersPublicData()
         });

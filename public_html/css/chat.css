@@ -55,6 +55,7 @@ input[type="text"] {
 .msg-window .container > div {
     padding: 2px 0;
     word-wrap: break-word;
+    word-break: break-all;
 }
 .msg-window .container > div > span {
     font-size: 0.9em;
