@@ -5,3 +5,4 @@ TODO:
  1) support for multiline messages
  2) pasting images from clipboard
  3) Nick change spamming protection
+ 4) Admin user and possibility to ban users from super user

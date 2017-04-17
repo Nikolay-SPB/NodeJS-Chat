@@ -5,14 +5,19 @@ var Debug = true;
 var Settings = {
     maxMessageLength: 500,
 
-    logToFile: true
+    logToFile: true,
+
+    ban_duration: 300000
 };
 
 var io = require('socket.io').listen(8090);
 var crypto = require('crypto');
 var fs = require('fs');
 
+var helpers = require('./back/helpers');
+
 var users = {};
+var bannedUsers = {};
 
 io.sockets.on('connection', function (socket)
 {
@@ -97,6 +102,7 @@ function monitorSpam(socket_id, socket)
 {
     var nick = socket.nick;
     var user = users[nick.toLowerCase()];
+    var lnick = nick.toLowerCase();
 
     if (!user.hasOwnProperty('spamMessagesCount')) {
         user.spamMessagesCount = 0;
@@ -112,13 +118,20 @@ function monitorSpam(socket_id, socket)
 
         user.removeBanTimerId = setTimeout(function(user, nick)
         {
+            var lnick = nick.toLowerCase();
+
             user.spamMessagesCount = 0;
             user.spamBanned = false;
+
+            delete bannedUsers[lnick];
 
             sendInfoMessage('spam_unmute', nick);
 
             debug.log('Removed chat ban for socket: ' + nick);
-        }.bind(this, user, nick), 300000);
+        }.bind(this, user, nick), Settings.ban_duration);
+
+        helpers.createObjectProperty(bannedUsers, lnick);
+        bannedUsers[lnick].isBanned = true;
     } else {
         clearTimeout(user.timerId);
 
@@ -165,8 +178,12 @@ function checkForBan(socket)
 {
     try {
         var user = users[socket.nick.toLowerCase()];
+        var lnick = socket.nick.toLowerCase();
 
-        if (user.hasOwnProperty('spamBanned') && user.spamBanned === true) {
+        if ((user.hasOwnProperty('spamBanned') && user.spamBanned === true)
+            ||
+            (bannedUsers.hasOwnProperty(lnick) && bannedUsers[lnick].isBanned === true)
+        ) {
             return true;
         }
 
