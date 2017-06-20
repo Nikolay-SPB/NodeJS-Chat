@@ -237,8 +237,4 @@ button[name="submitMessage"] {
     .msg-input-cnt {
         margin-right: 10px;
     }
-
-    .r-actions {
-        display: block;
-    }
 }

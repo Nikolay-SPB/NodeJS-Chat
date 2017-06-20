@@ -4,6 +4,7 @@
  * Created on 23.02.2017.
  */
 
+//TODO: move to settings
 var APP_LOCALE = 'ru';
 
 /**
@@ -14,7 +15,7 @@ var APP_LOCALE = 'ru';
 String.prototype.format = function() {
     var me = this;
 
-    for (i=0; i<arguments.length; i++) {
+    for (var i=0; i<arguments.length; i++) {
         me = me.replace(/(?:%s|%d)/, arguments[i]);
     }
 
@@ -52,6 +53,7 @@ function initApplication(i18n)
             });
         }
 
+        //TODO: move to settings
         var Settings = {
             chatHost: 'http://'+document.location.hostname+':8090',
 
@@ -79,6 +81,7 @@ function initApplication(i18n)
         var inputChangeNick = $('input[name="iChangeNick"]');
 
         var usersCnt = $('div.users .users-container');
+        var rightActionsBar = $('.r-actions');
 
         var registeredMessage = false;
 
@@ -243,6 +246,7 @@ function initApplication(i18n)
                             refreshUsersList(msg.users);
 
                             hideNickCntDisplayInputField();
+                            showRightActionsBar();
 
                             setCookie('connected', 1);
 
@@ -334,6 +338,18 @@ function initApplication(i18n)
 
                 msgInput.focus();
             });
+        }
+
+        function showRightActionsBar()
+        {
+            rightActionsBar.css('opacity', 0);
+            rightActionsBar.show();
+
+            rightActionsBar.animate({
+
+                opacity: 1
+
+            }, 500);
         }
 
         function refreshUsersList(users)
