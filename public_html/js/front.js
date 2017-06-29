@@ -26,6 +26,8 @@ $.get('i18n.json', function(data)
 {
     var i18n;
 
+    data = JSON.parse(data);
+
     if (data.hasOwnProperty(APP_LOCALE)) {
         i18n = data[APP_LOCALE];
 
