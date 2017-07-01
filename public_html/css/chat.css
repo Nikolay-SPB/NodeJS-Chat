@@ -35,6 +35,9 @@ button, .button {
     flex-direction: column;
     position: relative;
 }
+.msg-window .container > div:not(.self) > span.nick {
+    cursor: pointer;
+}
 input[name="msg-input"] {
     background-color: #fff;
     display: inline-block;
@@ -237,4 +240,9 @@ button[name="submitMessage"] {
     .msg-input-cnt {
         margin-right: 10px;
     }
+}
+
+.notification {
+    font-size: 12px;
+    color: #a0b9c7;
 }

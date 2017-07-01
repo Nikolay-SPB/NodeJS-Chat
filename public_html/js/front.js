@@ -26,7 +26,8 @@ $.get('i18n.json', function(data)
 {
     var i18n;
 
-    data = JSON.parse(data);
+    if (typeof data !== 'object')
+        data = JSON.parse(data);
 
     if (data.hasOwnProperty(APP_LOCALE)) {
         i18n = data[APP_LOCALE];
@@ -79,6 +80,7 @@ function initApplication(i18n)
         var btnSubmitMessage = $('button[name="submitMessage"]');
 
         var bottomCnt = $('.msg-btm');
+        var nickSpan = $('span.nick');
 
         var inputChangeNick = $('input[name="iChangeNick"]');
 
@@ -93,6 +95,14 @@ function initApplication(i18n)
         //initNotifications();
         initSmilesTipsContainer();
         initClipboardHandler();
+
+        msgWindow.delegate('div:not(".self") > span.nick', 'click', function()
+        {
+            var $nick = $(this).text().replace(':', '');
+
+            msgInput.val($nick + ', ');
+            msgInput.focus();
+        });
 
         msgInput.on('keyup', function(e)
         {
@@ -406,7 +416,7 @@ function initApplication(i18n)
 
             msgWindow.append(
                 '<div class="'+cls+'">' +
-                '<time>['+getTime()+']</time> <span>'+nick+':</span> ' + p.innerHTML +
+                    '<time>['+getTime()+']</time> <span class="nick">'+nick+':</span> ' + p.innerHTML +
                 '</div>'
             );
 
@@ -464,7 +474,7 @@ function initApplication(i18n)
         function notifyNewUser(userdata)
         {
             msgWindow.append(
-                '<div>' +
+                '<div class="notification">' +
                     '<time>['+getTime()+']</time> <i>* '+i18n.userJoined.format(userdata.nick)+'</i>' +
                 '</div>'
             );
@@ -475,7 +485,7 @@ function initApplication(i18n)
         function generalNotification(msg)
         {
             msgWindow.append(
-                '<div>' +
+                '<div class="notification">' +
                     '<time>['+getTime()+']</time> <i>* ' + msg +'</i>' +
                 '</div>'
             );
