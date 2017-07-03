@@ -44,7 +44,7 @@ input[name="msg-input"] {
 }
 input[type="text"] {
     font-size: 16px;
-    padding: 8px;
+    padding: 8px 36px 8px 8px;
     width: 100%;
     border: 1px solid #126b1c;
     box-sizing: border-box;
