@@ -13,11 +13,15 @@ var Settings = {
 var io = require('socket.io').listen(8090);
 var crypto = require('crypto');
 var fs = require('fs');
+var mysql = require('mysql');
 
 var helpers = require('./back/helpers');
 
 var users = {};
 var bannedUsers = {};
+var serverSettings = {};
+
+readServerSettings();
 
 io.sockets.on('connection', function (socket)
 {
@@ -97,6 +101,20 @@ io.sockets.on('connection', function (socket)
         }
     });
 });
+
+function readServerSettings()
+{
+    var serverSettingsFile = './server_settings.json';
+
+    try {
+        var stat = fs.statSync(serverSettingsFile);
+
+        var file = fs.readFileSync(serverSettingsFile);
+        serverSettings = JSON.parse(file);
+    } catch ($e) {
+        debug.log('[CRITICAL 0x8005] ' + $e);
+    }
+}
 
 function monitorSpam(socket_id, socket)
 {
@@ -208,6 +226,12 @@ function broadcastMessage(socket, uid, nick, message)
         nick: nick,
         message: message
     });
+
+    var time = new Date();
+    time = Math.round( time.getTime() / 1000 );
+
+    var query = "INSERT INTO `messages` (`m_body`, `m_date`, `author`) VALUES ('"+message+"', "+time+", '"+nick+"')";
+    mysqlQuery(query);
 }
 
 function parseCommand(command, msg, socket, sign)
@@ -307,6 +331,14 @@ var user = {
                 userdata: userdata,
                 users: user.getAllUsersPublicData(),
                 sign: users[userKey].sign
+            });
+
+            getLastMessages(function(results)
+            {
+                socket.json.send({
+                    status:'last_messages',
+                    messages: results
+                });
             });
         }
     },
@@ -437,6 +469,40 @@ function getCurrentTime()
     var s = date.getSeconds().length == 1 ? '0' + date.getSeconds() : date.getSeconds();
 
     return h + ":" + m + ":" + s;
+}
+
+function mysqlQuery(query, callback)
+{
+    var connection = mysql.createConnection({
+        host     : serverSettings.mysql.host,
+        user     : serverSettings.mysql.user,
+        password : serverSettings.mysql.pass,
+        database : serverSettings.mysql.db
+    });
+
+    connection.connect();
+
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            debug.log('[CRITICAL 0x8006] MySQL error: ' + error);
+        } else {
+            if (typeof callback === 'function') {
+                callback(results);
+            }
+        }
+    });
+
+    connection.end();
+}
+
+function getLastMessages(callback)
+{
+    var query = "SELECT * FROM `messages` ORDER BY m_id DESC LIMIT 0, 20";
+
+    mysqlQuery(query, function(results)
+    {
+        callback(results);
+    });
 }
 
 debug.log('Server started ' + getCurrentDateTime());

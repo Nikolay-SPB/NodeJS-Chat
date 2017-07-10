@@ -323,6 +323,15 @@ function initApplication(i18n)
 
                             generalNotification(message);
                             break;
+
+                        case 'last_messages':
+
+                            for (var i=msg.messages.length-1; i >= 0; i--) {
+
+                                insertMessage(msg.messages[i].author, msg.messages[i].m_body, '', msg.messages[i].m_date * 1000);
+                            }
+
+                            break;
                     }
                 });
 
@@ -404,7 +413,7 @@ function initApplication(i18n)
             msgInput.val('');
         }
 
-        function insertMessage(nick, message, message_type)
+        function insertMessage(nick, message, message_type, timestamp)
         {
             var p = document.createElement('p');
             p.innerText = p.textContent = message;
@@ -414,9 +423,11 @@ function initApplication(i18n)
 
             var cls = message_type == 'self' ? 'self' : '';
 
+            var cTime = timestamp ? getTime(timestamp) : getTime();
+
             msgWindow.append(
                 '<div class="'+cls+'">' +
-                    '<time>['+getTime()+']</time> <span class="nick">'+nick+':</span> ' + p.innerHTML +
+                    '<time>['+ cTime +']</time> <span class="nick">'+nick+':</span> ' + p.innerHTML +
                 '</div>'
             );
 
@@ -493,9 +504,13 @@ function initApplication(i18n)
             msgWindowScrollToBottom();
         }
 
-        function getTime()
+        function getTime(timestamp)
         {
             var dt = new Date();
+
+            if (timestamp) {
+                dt.setTime(timestamp);
+            }
 
             return dt.getHours() + ":" + (dt.getMinutes().toString().length == 1 ? ('0' + dt.getMinutes()) : dt.getMinutes());
         }

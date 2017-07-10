@@ -2,3 +2,4 @@
 /node_modules
 general.log
 settings.development.json
+/server_settings.json

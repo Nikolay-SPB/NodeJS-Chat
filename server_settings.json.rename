@@ -1,0 +1,8 @@
+{
+    "mysql": {
+        "host": "127.0.0.1",
+        "user": "my_user",
+        "pass": "user_password",
+        "db": "my_chat_database"
+    }
+}
