@@ -480,6 +480,12 @@ function initApplication(i18n)
                 '<br><a href="$1://$2.$3" target="_blank"><img src="$1://$2.$3" alt="image" /></a>'
             );
 
+            // parse links
+            msg = msg.replace(
+                /(https|http)(\:\/\/)([a-z\:0-9\/\.\-\_\?\&\=;]+)/i,
+                '<a href="$1$2$3" class="inner-text-link" target="_blank">$1$2$3</a>'
+            );
+
             return msg;
         }
 
