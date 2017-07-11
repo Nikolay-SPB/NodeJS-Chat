@@ -427,7 +427,7 @@ function initApplication(i18n)
 
             msgWindow.append(
                 '<div class="'+cls+'">' +
-                    '<time>['+ cTime +']</time> <span class="nick">'+nick+':</span> ' + p.innerHTML +
+                    '<time>'+ cTime +'</time> <span class="nick">'+nick+'</span> ' + p.innerHTML +
                 '</div>'
             );
 
