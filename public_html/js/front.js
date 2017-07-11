@@ -486,6 +486,14 @@ function initApplication(i18n)
                 '<a href="$1$2$3" class="inner-text-link" target="_blank">$1$2$3</a>'
             );
 
+            // adult filter
+            var adultFilter = new RegExp('('+ i18n.adultFilterBadWords + ')', 'ig');
+
+            msg = msg.replace(
+                adultFilter,
+                '***'
+            );
+
             return msg;
         }
 

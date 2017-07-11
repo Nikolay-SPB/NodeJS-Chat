@@ -1,4 +1,3 @@
-TODO: Mature filter?
 TODO: When someone send message to me, fire notification if window is not focused
 
 TODO:
