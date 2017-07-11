@@ -75,14 +75,13 @@ input[type="text"] {
     margin-top: 10px;
     display: none;
     align-items: center;
-    flex-direction: column;
 }
 .msg-window > h1 {
+    margin: 1% 1% 2% 1%;
     border-bottom: 1px solid #cad1dc;
-    padding-bottom: 4%;
+    padding-bottom: 50px;
     position: relative;
     font-size: calc(21px + 1vw);
-    margin: 1% 1% 5% 1%;
     text-align: center;
 }
 
@@ -114,8 +113,12 @@ input[type="text"] {
     width: 500px;
     right: 0;
     text-align: right;
-    top: -6px;
+    top: 26px;
     display: none;
+}
+
+.r-actions button {
+    padding: 6px 11px;
 }
 
 input[name="iChangeNick"] {
@@ -172,7 +175,7 @@ input[name="iChangeNick"] {
 button[name="submitMessage"] {
     width: 95%;
     display: inline-block;
-    flex: 1 1 15%;
+    flex: 1 0 15%;
 }
 
 .container > div > a > img {
@@ -226,10 +229,6 @@ button[name="submitMessage"] {
         display: block;
     }
 
-    .msg-btm {
-        flex-direction: row;
-    }
-
     .msg-window > h1 {
         padding-bottom: 32px;
         font-size: 30px;
@@ -239,6 +238,10 @@ button[name="submitMessage"] {
 
     .msg-input-cnt {
         margin-right: 10px;
+    }
+
+    .r-actions {
+        top: -6px;
     }
 }
 
