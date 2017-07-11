@@ -444,6 +444,7 @@ function initApplication(i18n)
         function applySmiles(msg)
         {
             msg = msg.replace(/:\)/ig,     '<span title=":)" class="smiley sm1"></span>');
+            msg = msg.replace(/:\(/ig,     '<span title=":(" class="smiley sm10"></span>');
             msg = msg.replace(/:d/ig,    '<span title=":D" class="smiley sm2"></span>');
             msg = msg.replace(/;\)/ig,     '<span title=";)" class="smiley sm3"></span>');
             msg = msg.replace(/xD/g,    '<span title="xD" class="smiley sm4"></span>');
@@ -497,7 +498,7 @@ function initApplication(i18n)
         {
             msgWindow.append(
                 '<div class="notification">' +
-                    '<time>['+getTime()+']</time> <i>* ' + msg +'</i>' +
+                    '<time>'+getTime()+'</time> <i>* ' + msg +'</i>' +
                 '</div>'
             );
 

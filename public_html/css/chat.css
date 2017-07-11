@@ -70,7 +70,7 @@ input[type="text"] {
     font-size: 0.9em;
     color: #70b589;
 }
-.msg-window .container > div.self > span {
+.msg-window .container > div.self > span.nick {
     cursor: pointer;
     background-color: #038faf;
     display: inline-block;
@@ -100,7 +100,7 @@ input[type="text"] {
     border: 1px solid #78d2ff;
     background-color: #ddefff;
     border-radius: 0.7vw;
-    padding: 1% !important;
+    padding: 0.5% !important;
     margin-left: 20%;
     margin-right: 10px;
     margin-top: 0.3%;
@@ -109,7 +109,7 @@ input[type="text"] {
     border: 1px solid #bce8bd;
     background-color: #f6fff8;
     border-radius: 0.7vw;
-    padding: 1% !important;
+    padding: 0.5% !important;
     margin-right: 20%;
     margin-left: 10px;
     margin-top: 0.3%;
@@ -213,6 +213,10 @@ input[name="iChangeNick"] {
 
 .sm9 {
     background-image: url('../i/smiles/smile_9.png');
+}
+
+.sm10 {
+    background-image: url(../i/smiles/smile_10.png);
 }
 
 button[name="submitMessage"] {
