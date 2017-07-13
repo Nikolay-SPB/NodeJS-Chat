@@ -39,7 +39,7 @@ button, .button {
     cursor: pointer;
     background-color: #236473;
     display: inline-block;
-    padding: 18px 6px;
+    padding: 10px 8px;
     border-radius: 50%;
     color: azure;
 }
@@ -71,10 +71,9 @@ input[type="text"] {
     color: #70b589;
 }
 .msg-window .container > div.self > span.nick {
-    cursor: pointer;
     background-color: #038faf;
     display: inline-block;
-    padding: 18px 6px;
+    padding: 10px 8px;
     border-radius: 50%;
     color: white;
 }
@@ -97,8 +96,7 @@ input[type="text"] {
 }
 
 .msg-window .container > div.self {
-    border: 1px solid #78d2ff;
-    background-color: #ddefff;
+    background-color: #a3c0d4;
     border-radius: 0.7vw;
     padding: 0.5% !important;
     margin-left: 20%;
@@ -106,8 +104,7 @@ input[type="text"] {
     margin-top: 0.3%;
 }
 .msg-window .container > div:not(.self) {
-    border: 1px solid #bce8bd;
-    background-color: #f6fff8;
+    background-color: #d5e7ea;
     border-radius: 0.7vw;
     padding: 0.5% !important;
     margin-right: 20%;
