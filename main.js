@@ -213,7 +213,8 @@ function checkForBan(socket)
 
 function broadcastMessage(socket, uid, nick, message)
 {
-    debug.log('User ('+nick+') send message: '+message + ' ip: ' + socket.request.connection.remoteAddress);
+    debug.log('User ('+nick+') send message: '+message + ' ip: ' + socket.request.connection.remoteAddress + ' ip2: ' +
+        socket.handshake.address);
 
     socket.broadcast.json.send({
         status: 'message',
